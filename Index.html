@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KanalProtokoll">
+<meta name="theme-color" content="#0a0f1a">
+<title>KanalProtokoll</title>
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg2: #111827;
+    --bg3: #0d1f3c;
+    --border: #1e3a5f;
+    --accent: #60a5fa;
+    --accent2: #4ade80;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --green: #4ade80;
+    --safe: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overscroll-behavior: none;
+  }
+  /* HEADER */
+  #header {
+    background: linear-gradient(135deg, #0d1f3c 0%, #1a3a5c 100%);
+    padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  #header h1 { font-size: 17px; font-weight: 800; color: #fff; }
+  #header small { font-size: 10px; color: var(--accent); display: block; margin-top: 1px; }
+  /* TABS */
+  #tabs {
+    display: flex;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: calc(53px + env(safe-area-inset-top, 0px)); z-index: 99;
+  }
+  .tab-btn {
+    flex: 1; padding: 11px 0; background: transparent; border: none;
+    color: var(--text3); font-size: 13px; font-weight: 500;
+    border-bottom: 2px solid transparent; cursor: pointer;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+  /* CONTENT */
+  #content { max-width: 600px; margin: 0 auto; padding: 14px 14px calc(30px + var(--safe)); }
+  /* SECTIONS */
+  .section {
+    background: var(--bg2);
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 13px; font-weight: 700; color: var(--accent);
+    margin-bottom: 13px; letter-spacing: .03em;
+  }
+  /* INPUTS */
+  label.lbl {
+    display: block; font-size: 10px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .06em;
+    font-weight: 600; margin-bottom: 5px;
+  }
+  input[type=text], input[type=date], input[type=time], input[type=number], textarea, select {
+    background: #0f172a; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--text); font-size: 14px;
+    width: 100%; font-family: inherit; appearance: none;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 72px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mt { margin-top: 10px; }
+  /* BUTTONS */
+  .btn {
+    display: inline-block; border: none; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; font-weight: 600;
+    cursor: pointer; color: #fff; font-family: inherit; transition: opacity .15s;
+  }
+  .btn:active { opacity: .75; }
+  .btn-blue { background: #1a3a6b; }
+  .btn-green { background: #1a5c3a; }
+  .btn-purple { background: #4a1a6b; }
+  .btn-red { background: #7f1d1d; }
+  .btn-gray { background: #1e293b; }
+  .btn-full { width: 100%; text-align: center; padding: 13px; font-size: 15px; }
+  .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+  /* CHIP BUTTONS */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 7px 12px; font-size: 12px; font-weight: 600;
+    background: #1e293b; color: var(--text2); cursor: pointer;
+    transition: all .15s; font-family: inherit;
+  }
+  .chip.active-green { background: #14532d; color: var(--green); border-color: var(--green); }
+  .chip.active-yellow { background: #713f12; color: var(--yellow); border-color: var(--yellow); }
+  .chip.active-orange { background: #7c2d12; color: #fb923c; border-color: #fb923c; }
+  .chip.active-red { background: #7f1d1d; color: var(--red); border-color: var(--red); }
+  .chip.active-dmg { background: #451a1a; color: var(--red); border-color: #dc2626; }
+  /* BADGE */
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 10px;
+    font-size: 10px; font-weight: 700;
+  }
+  .badge-green { background: #14532d; color: var(--green); }
+  .badge-yellow { background: #713f12; color: var(--yellow); }
+  .badge-orange { background: #7c2d12; color: #fb923c; }
+  .badge-red { background: #450a0a; color: var(--red); }
+  /* FOTO */
+  #foto-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .foto-thumb { position: relative; }
+  .foto-thumb img { width: 78px; height: 78px; object-fit: cover; border-radius: 8px; border: 2px solid var(--border); display: block; }
+  .foto-del {
+    position: absolute; top: -6px; right: -6px;
+    background: #ef4444; color: #fff; border: none; border-radius: 50%;
+    width: 20px; height: 20px; font-size: 11px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .foto-ts { font-size: 8px; color: var(--text3); text-align: center; margin-top: 2px; }
+  /* CANVAS */
+  #canvas-wrap { position: relative; margin-top: 10px; }
+  #sketch-canvas {
+    width: 100%; border-radius: 10px; display: block;
+    touch-action: none; cursor: crosshair;
+    border: 1px solid var(--border);
+  }
+  .color-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .color-dot {
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: border-color .15s; flex-shrink: 0;
+  }
+  .color-dot.sel { border-color: #fff; }
+  /* GPS */
+  #gps-info { font-size: 11px; color: var(--accent2); font-family: monospace; margin-top: 6px; }
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: calc(20px + var(--safe)); left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #14532d; color: var(--green); border-radius: 10px;
+    padding: 11px 20px; font-weight: 700; font-size: 14px;
+    z-index: 999; transition: transform .3s; white-space: nowrap;
+    box-shadow: 0 4px 24px rgba(0,0,0,.5);
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  /* ARCHIV */
+  .proto-card {
+    background: var(--bg2); border-radius: 10px; padding: 13px;
+    border: 1px solid var(--border); margin-bottom: 10px; cursor: pointer;
+    transition: border-color .15s;
+  }
+  .proto-card:active { border-color: var(--accent); }
+  .proto-id { color: var(--accent); font-weight: 700; font-size: 14px; }
+  .proto-meta { color: var(--text2); font-size: 11px; margin-top: 2px; }
+  .proto-addr { color: var(--text3); font-size: 11px; }
+  .proto-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+  .tag { background: #1e3a5f; color: #93c5fd; padding: 2px 7px; border-radius: 8px; font-size: 10px; }
+  .tag-dmg { background: #451a1a; color: var(--red); }
+  .proto-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+  /* EMPTY */
+  .empty { text-align: center; padding: 50px 20px; color: var(--text3); }
+  .empty .emoji { font-size: 52px; margin-bottom: 12px; }
+  /* NEW BTN */
+  #new-btn {
+    background: #1a5c3a; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 13px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>🕳️ KanalProtokoll</h1>
+    <small>Kanalschacht-Inspektion</small>
+  </div>
+  <button id="new-btn" onclick="neuesProtokoll()">+ Neu</button>
+</div>
+
+<div id="tabs">
+  <button class="tab-btn active" id="tab-form" onclick="switchTab('form')">📝 Protokoll</button>
+  <button class="tab-btn" id="tab-arch" onclick="switchTab('arch')">📂 Archiv (<span id="arch-count">0</span>)</button>
+</div>
+
+<div id="content">
+  <!-- TOAST -->
+  <div id="toast">✅ Gespeichert!</div>
+
+  <!-- ===== FORMULAR ===== -->
+  <div id="view-form">
+
+    <!-- Allgemein -->
+    <div class="section">
+      <div class="section-title">📋 Allgemein</div>
+      <div class="grid2">
+        <div><label class="lbl">Datum</label><input type="date" id="f-datum"></div>
+        <div><label class="lbl">Uhrzeit</label><input type="time" id="f-uhrzeit"></div>
+      </div>
+      <div class="mt"><label class="lbl">Techniker</label><input type="text" id="f-tech" placeholder="Vor- und Nachname"></div>
+      <div class="mt"><label class="lbl">Auftragsnummer</label><input type="text" id="f-auftrag" placeholder="z.B. AU-2024-0042"></div>
+    </div>
+
+    <!-- Standort -->
+    <div class="section">
+      <div class="section-title">📍 Standort</div>
+      <label class="lbl">Adresse / Bezeichnung</label>
+      <input type="text" id="f-standort" placeholder="Straße, Hausnr., Ort">
+      <div class="mt">
+        <button class="btn btn-green" onclick="erfasseGPS()">📍 GPS erfassen</button>
+        <div id="gps-info"></div>
+      </div>
+    </div>
+
+    <!-- Schachtdaten -->
+    <div class="section">
+      <div class="section-title">🕳️ Schachtdaten</div>
+      <label class="lbl">Schacht-Nummer</label>
+      <input type="text" id="f-nr" placeholder="z.B. KS-042">
+      <div class="mt"><label class="lbl">Schachttyp</label>
+        <select id="f-typ">
+          <option value="">– auswählen –</option>
+          <option>Revisionsschacht</option><option>Einsteigschacht</option>
+          <option>Kontrollschacht</option><option>Sammelschacht</option>
+        </select>
+      </div>
+      <div class="grid2 mt">
+        <div><label class="lbl">Tiefe (m)</label><input type="number" id="f-tiefe" step="0.1" placeholder="z.B. 2.5"></div>
+        <div><label class="lbl">Ø Durchmesser (mm)</label><input type="number" id="f-dm" placeholder="z.B. 1000"></div>
+      </div>
+      <div class="grid2 mt">
+        <div><label class="lbl">Material</label>
+          <select id="f-mat">
+            <option value="">– auswählen –</option>
+            <option>Beton</option><option>Kunststoff (PE)</option>
+            <option>Steinzeug</option><option>Mauerwerk</option><option>GFK</option>
+          </select>
+        </div>
+        <div><label class="lbl">Deckeltyp</label>
+          <select id="f-deckel">
+            <option value="">– auswählen –</option>
+            <option>Gusseisen</option><option>Kunststoff</option>
+            <option>Stahl</option><option>Beton</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zustand -->
+    <div class="section">
+      <div class="section-title">⚠️ Zustand & Schäden</div>
+      <label class="lbl">Gesamtzustand</label>
+      <div class="chip-group" id="zustand-group">
+        <button class="chip" data-z="Einwandfrei" onclick="setZustand(this)">Einwandfrei</button>
+        <button class="chip" data-z="Leichte Mängel" onclick="setZustand(this)">Leichte Mängel</button>
+        <button class="chip" data-z="Starke Mängel" onclick="setZustand(this)">Starke Mängel</button>
+        <button class="chip" data-z="Dringend reparaturbedürftig" onclick="setZustand(this)">Dringend reparaturbedürftig</button>
+      </div>
+      <div class="mt"><label class="lbl">Schäden (Mehrfachauswahl)</label>
+        <div class="chip-group" id="schaden-group">
+          <button class="chip" onclick="toggleSchaden(this)">Risse</button>
+          <button class="chip" onclick="toggleSchaden(this)">Wurzeleinwuchs</button>
+          <button class="chip" onclick="toggleSchaden(this)">Ablagerungen</button>
+          <button class="chip" onclick="toggleSchaden(this)">Korrosion</button>
+          <button class="chip" onclick="toggleSchaden(this)">Undichtigkeit</button>
+          <button class="chip" onclick="toggleSchaden(this)">Versatz</button>
+          <button class="chip" onclick="toggleSchaden(this)">Fehlende Teile</button>
+          <button class="chip" onclick="toggleSchaden(this)">Eindringendes Wasser</button>
+        </div>
+      </div>
+      <div class="mt"><label class="lbl">Bemerkungen</label>
+        <textarea id="f-bem" placeholder="Weitere Anmerkungen, Hinweise für Reparatur…"></textarea>
+      </div>
+    </div>
+
+    <!-- Fotos -->
+    <div class="section">
+      <div class="section-title">📷 Fotos</div>
+      <input type="file" id="foto-input" accept="image/*" multiple capture="environment" style="display:none" onchange="fotoAdd(event)">
+      <button class="btn btn-blue" onclick="document.getElementById('foto-input').click()">📷 Foto aufnehmen / wählen</button>
+      <div id="foto-grid"></div>
+    </div>
+
+    <!-- Skizze -->
+    <div class="section">
+      <div class="section-title">✏️ Skizze</div>
+      <div class="color-row">
+        <div class="color-dot sel" style="background:#00ff88" data-c="#00ff88" onclick="setColor(this)"></div>
+        <div class="color-dot" style="background:#60a5fa" data-c="#60a5fa" onclick="setColor(this)"></div>
+        <div class="color-dot" style="background:#f87171" data-c="#f87171" onclick="setColor(this)"></div>
+        <div class="color-dot" style="background:#fbbf24" data-c="#fbbf24" onclick="setColor(this)"></div>
+        <div class="color-dot" style="background:#e879f9" data-c="#e879f9" onclick="setColor(this)"></div>
+        <div class="color-dot" style="background:#ffffff" data-c="#ffffff" onclick="setColor(this)"></div>
+        <select id="sz-size" style="width:70px;padding:6px 8px;font-size:12px">
+          <option value="2">2px</option><option value="4" selected>4px</option>
+          <option value="8">8px</option><option value="14">14px</option>
+        </select>
+        <button class="btn btn-red" style="padding:6px 10px;font-size:12px" onclick="clearCanvas()">🗑 Löschen</button>
+      </div>
+      <canvas id="sketch-canvas" width="400" height="280"></canvas>
+    </div>
+
+    <!-- Speichern / Export -->
+    <div class="btn-row">
+      <button class="btn btn-green btn-full" onclick="speichern()">💾 Speichern</button>
+      <button class="btn btn-blue btn-full" onclick="exportHTML()">📄 Exportieren</button>
+    </div>
+
+  </div><!-- end view-form -->
+
+  <!-- ===== ARCHIV ===== -->
+  <div id="view-arch" style="display:none">
+    <div id="arch-list"></div>
+  </div>
+
+</div><!-- end content -->
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+let protokolle = JSON.parse(localStorage.getItem('kp_proto') || '[]');
+let currentId = null;
+let currentGPS = null;
+let currentFotos = [];
+let selectedZustand = '';
+let selectedSchaeden = [];
+let drawColor = '#00ff88';
+let drawSize = 4;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => {
+  setDefaults();
+  initCanvas();
+  updateArchCount();
+};
+
+function setDefaults() {
+  const now = new Date();
+  document.getElementById('f-datum').value = now.toISOString().split('T')[0];
+  document.getElementById('f-uhrzeit').value = now.toTimeString().slice(0,5);
+}
+
+function genId() { return 'SCH-' + Date.now().toString(36).toUpperCase(); }
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(t) {
+  document.getElementById('view-form').style.display = t==='form' ? '' : 'none';
+  document.getElementById('view-arch').style.display = t==='arch' ? '' : 'none';
+  document.getElementById('tab-form').classList.toggle('active', t==='form');
+  document.getElementById('tab-arch').classList.toggle('active', t==='arch');
+  if (t==='arch') renderArchiv();
+}
+
+// ── NEUES PROTOKOLL ──────────────────────────────────────────────────────────
+function neuesProtokoll() {
+  currentId = null; currentGPS = null; currentFotos = [];
+  selectedZustand = ''; selectedSchaeden = [];
+  ['f-datum','f-uhrzeit','f-tech','f-auftrag','f-standort','f-nr','f-tiefe','f-dm','f-bem'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['f-typ','f-mat','f-deckel'].forEach(id => document.getElementById(id).value = '');
+  setDefaults();
+  document.getElementById('gps-info').textContent = '';
+  document.getElementById('foto-grid').innerHTML = '';
+  document.querySelectorAll('#zustand-group .chip').forEach(c => c.className='chip');
+  document.querySelectorAll('#schaden-group .chip').forEach(c => c.className='chip');
+  clearCanvas();
+  switchTab('form');
+}
+
+// ── GPS ──────────────────────────────────────────────────────────────────────
+function erfasseGPS() {
+  const btn = event.target;
+  btn.textContent = '⌛ Ortung...';
+  btn.disabled = true;
+  if (!navigator.geolocation) { alert('GPS nicht verfügbar'); btn.textContent='📍 GPS erfassen'; btn.disabled=false; return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    currentGPS = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
+    document.getElementById('gps-info').textContent = `${currentGPS.lat}, ${currentGPS.lng}  (±${currentGPS.acc} m)`;
+    btn.textContent='📍 GPS erfassen'; btn.disabled=false;
+  }, () => { alert('GPS konnte nicht ermittelt werden'); btn.textContent='📍 GPS erfassen'; btn.disabled=false; }, {enableHighAccuracy:true, timeout:10000});
+}
+
+// ── ZUSTAND & SCHÄDEN ────────────────────────────────────────────────────────
+const zustandClass = { 'Einwandfrei':'active-green','Leichte Mängel':'active-yellow','Starke Mängel':'active-orange','Dringend reparaturbedürftig':'active-red' };
+
+function setZustand(el) {
+  selectedZustand = el.dataset.z;
+  document.querySelectorAll('#zustand-group .chip').forEach(c => { c.className='chip'; });
+  el.className = 'chip ' + (zustandClass[selectedZustand] || '');
+}
+
+function toggleSchaden(el) {
+  const v = el.textContent;
+  if (selectedSchaeden.includes(v)) {
+    selectedSchaeden = selectedSchaeden.filter(x=>x!==v);
+    el.className = 'chip';
+  } else {
+    selectedSchaeden.push(v);
+    el.className = 'chip active-dmg';
+  }
+}
+
+// ── FOTOS ────────────────────────────────────────────────────────────────────
+function fotoAdd(e) {
+  const files = Array.from(e.target.files);
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const id = Date.now() + Math.random();
+      currentFotos.push({ id, data: ev.target.result, ts: new Date().toLocaleTimeString('de-AT') });
+      renderFotos();
+    };
+    reader.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function renderFotos() {
+  const grid = document.getElementById('foto-grid');
+  grid.innerHTML = currentFotos.map(f => `
+    <div class="foto-thumb">
+      <img src="${f.data}" alt="Foto">
+      <button class="foto-del" onclick="fotoDelete(${f.id})">✕</button>
+      <div class="foto-ts">${f.ts}</div>
+    </div>`).join('');
+}
+
+function fotoDelete(id) {
+  currentFotos = currentFotos.filter(f => f.id !== id);
+  renderFotos();
+}
+
+// ── CANVAS / SKIZZE ──────────────────────────────────────────────────────────
+function initCanvas() {
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Vorlage
+  ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  ctx.beginPath(); ctx.arc(cx,cy,70,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,40,0,Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#334155'; ctx.font='11px monospace'; ctx.textAlign='center';
+  ctx.fillText('Schacht-Skizze', cx, 18);
+
+  const getPos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    const sx = canvas.width/r.width, sy = canvas.height/r.height;
+    const src = e.touches ? e.touches[0] : e;
+    return { x:(src.clientX-r.left)*sx, y:(src.clientY-r.top)*sy };
+  };
+  const start = (e) => { e.preventDefault(); isDrawing=true; const p=getPos(e); lastX=p.x; lastY=p.y; };
+  const move = (e) => {
+    if(!isDrawing) return; e.preventDefault();
+    const p=getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle=drawColor; ctx.lineWidth=drawSize; ctx.lineCap='round'; ctx.stroke();
+    lastX=p.x; lastY=p.y;
+  };
+  const end = () => { isDrawing=false; };
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move);
+  canvas.addEventListener('mouseup',end); canvas.addEventListener('mouseleave',end);
+  canvas.addEventListener('touchstart',start,{passive:false});
+  canvas.addEventListener('touchmove',move,{passive:false});
+  canvas.addEventListener('touchend',end);
+}
+
+function setColor(el) {
+  drawColor = el.dataset.c;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+document.addEventListener('change', e => { if(e.target.id==='sz-size') drawSize = +e.target.value; });
+
+function clearCanvas() {
+  const canvas = document.getElementById('sketch-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='#1e3a5f'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  ctx.beginPath(); ctx.arc(cx,cy,70,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,40,0,Math.PI*2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#334155'; ctx.font='11px monospace'; ctx.textAlign='center';
+  ctx.fillText('Schacht-Skizze', cx, 18);
+}
+
+function getSkizze() {
+  return document.getElementById('sketch-canvas').toDataURL();
+}
+
+// ── LESEN / SCHREIBEN ────────────────────────────────────────────────────────
+function readForm() {
+  return {
+    id: currentId || genId(),
+    datum: document.getElementById('f-datum').value,
+    uhrzeit: document.getElementById('f-uhrzeit').value,
+    techniker: document.getElementById('f-tech').value,
+    auftragsnummer: document.getElementById('f-auftrag').value,
+    standort: document.getElementById('f-standort').value,
+    gps: currentGPS,
+    schachtNummer: document.getElementById('f-nr').value,
+    schachtTyp: document.getElementById('f-typ').value,
+    tiefe: document.getElementById('f-tiefe').value,
+    durchmesser: document.getElementById('f-dm').value,
+    material: document.getElementById('f-mat').value,
+    deckelTyp: document.getElementById('f-deckel').value,
+    zustand: selectedZustand,
+    schaeden: [...selectedSchaeden],
+    bemerkungen: document.getElementById('f-bem').value,
+    fotos: currentFotos,
+    skizze: getSkizze(),
+  };
+}
+
+function fillForm(p) {
+  currentId = p.id; currentGPS = p.gps || null;
+  currentFotos = p.fotos || []; selectedZustand = p.zustand || '';
+  selectedSchaeden = p.schaeden || [];
+  document.getElementById('f-datum').value = p.datum || '';
+  document.getElementById('f-uhrzeit').value = p.uhrzeit || '';
+  document.getElementById('f-tech').value = p.techniker || '';
+  document.getElementById('f-auftrag').value = p.auftragsnummer || '';
+  document.getElementById('f-standort').value = p.standort || '';
+  document.getElementById('f-nr').value = p.schachtNummer || '';
+  document.getElementById('f-typ').value = p.schachtTyp || '';
+  document.getElementById('f-tiefe').value = p.tiefe || '';
+  document.getElementById('f-dm').value = p.durchmesser || '';
+  document.getElementById('f-mat').value = p.material || '';
+  document.getElementById('f-deckel').value = p.deckelTyp || '';
+  document.getElementById('f-bem').value = p.bemerkungen || '';
+  if (p.gps) document.getElementById('gps-info').textContent = `${p.gps.lat}, ${p.gps.lng}  (±${p.gps.acc} m)`;
+  else document.getElementById('gps-info').textContent = '';
+  // Zustand
+  document.querySelectorAll('#zustand-group .chip').forEach(c => {
+    c.className = 'chip' + (c.dataset.z === selectedZustand ? ' '+(zustandClass[selectedZustand]||'') : '');
+  });
+  // Schäden
+  document.querySelectorAll('#schaden-group .chip').forEach(c => {
+    c.className = 'chip' + (selectedSchaeden.includes(c.textContent) ? ' active-dmg' : '');
+  });
+  renderFotos();
+  // Canvas
+  if (p.skizze) {
+    const canvas = document.getElementById('sketch-canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0); };
+    img.src = p.skizze;
+  } else clearCanvas();
+}
+
+// ── SPEICHERN ─────────────────────────────────────────────────────────────────
+function speichern() {
+  const p = readForm();
+  const idx = protokolle.findIndex(x => x.id === p.id);
+  if (idx >= 0) protokolle[idx] = p;
+  else protokolle.unshift(p);
+  currentId = p.id;
+  localStorage.setItem('kp_proto', JSON.stringify(protokolle));
+  updateArchCount();
+  showToast('✅ Protokoll gespeichert!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function updateArchCount() {
+  document.getElementById('arch-count').textContent = protokolle.length;
+}
+
+// ── ARCHIV ────────────────────────────────────────────────────────────────────
+const badgeClass = { 'Einwandfrei':'badge-green','Leichte Mängel':'badge-yellow','Starke Mängel':'badge-orange','Dringend reparaturbedürftig':'badge-red' };
+
+function renderArchiv() {
+  const el = document.getElementById('arch-list');
+  if (!protokolle.length) {
+    el.innerHTML = `<div class="empty"><div class="emoji">🕳️</div>Noch keine Protokolle vorhanden</div>`;
+    return;
+  }
+  el.innerHTML = protokolle.map((p,i) => `
+    <div class="proto-card" onclick="ladeProtokoll(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="proto-id">${p.schachtNummer || p.id}</div>
+          <div class="proto-meta">${p.datum} · ${p.uhrzeit} Uhr · ${p.techniker || 'Unbekannt'}</div>
+          <div class="proto-addr">${p.standort || 'Kein Standort'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+          ${p.zustand ? `<span class="badge ${badgeClass[p.zustand]||''}">${p.zustand}</span>` : ''}
+          <button class="btn btn-red" style="padding:4px 9px;font-size:11px" onclick="event.stopPropagation();deleteProto(${i})">🗑</button>
+        </div>
+      </div>
+      <div class="proto-tags">
+        ${p.fotos?.length ? `<span class="tag">📷 ${p.fotos.length}</span>` : ''}
+        ${p.gps ? `<span class="tag">📍 GPS</span>` : ''}
+        ${p.skizze ? `<span class="tag">✏️ Skizze</span>` : ''}
+        ${p.schaeden?.length ? `<span class="tag tag-dmg">⚠️ ${p.schaeden.length} Schäden</span>` : ''}
+      </div>
+      <div class="proto-actions">
+        <button class="btn btn-blue" style="padding:6px 12px;font-size:12px" onclick="event.stopPropagation();exportProto(${i})">📄 Export</button>
+      </div>
+    </div>`).join('');
+}
+
+function ladeProtokoll(i) {
+  fillForm(protokolle[i]);
+  switchTab('form');
+}
+
+function deleteProto(i) {
+  if (!confirm(`Protokoll „${protokolle[i].schachtNummer || protokolle[i].id}" wirklich löschen?`)) return;
+  protokolle.splice(i, 1);
+  localStorage.setItem('kp_proto', JSON.stringify(protokolle));
+  updateArchCount();
+  renderArchiv();
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportHTML() { exportProtoData(readForm()); }
+function exportProto(i) { exportProtoData(protokolle[i]); }
+
+function exportProtoData(p) {
+  const html = `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Protokoll ${p.id}</title>
+<style>
+body{font-family:Arial,sans-serif;font-size:13px;color:#111;margin:0;padding:0;background:#fff}
+.hdr{background:#1a3a5c;color:#fff;padding:14px 20px}
+.hdr h1{font-size:20px;margin:0}
+.hdr p{margin:3px 0 0;font-size:11px;opacity:.8}
+.body{padding:16px 20px;max-width:700px}
+h2{font-size:13px;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:4px;margin:18px 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.f{background:#f0f4f8;padding:7px 10px;border-radius:4px;border-left:3px solid #1a3a5c}
+.f .lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:#666}
+.f .val{font-weight:700;margin-top:1px}
+.chip{display:inline-block;background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:10px;margin:2px;font-size:11px}
+.foto-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.foto-row img{width:130px;height:100px;object-fit:cover;border-radius:4px;border:1px solid #ddd}
+.skizze img{max-width:320px;border:1px solid #ddd;border-radius:4px}
+.foot{margin-top:24px;padding:10px;border-top:1px solid #ddd;font-size:10px;color:#999;text-align:center}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<div class="hdr">
+  <h1>🕳️ Kanalschacht-Protokoll</h1>
+  <p>${p.id} · Erstellt: ${new Date().toLocaleString('de-AT')}</p>
+</div>
+<div class="body">
+<h2>Allgemein</h2>
+<div class="grid">
+  <div class="f"><div class="lbl">Protokoll-ID</div><div class="val">${p.id}</div></div>
+  <div class="f"><div class="lbl">Datum / Uhrzeit</div><div class="val">${p.datum} – ${p.uhrzeit} Uhr</div></div>
+  <div class="f"><div class="lbl">Techniker</div><div class="val">${p.techniker||'–'}</div></div>
+  <div class="f"><div class="lbl">Auftragsnummer</div><div class="val">${p.auftragsnummer||'–'}</div></div>
+</div>
+<h2>Standort</h2>
+<div class="grid">
+  <div class="f"><div class="lbl">Adresse</div><div class="val">${p.standort||'–'}</div></div>
+  <div class="f"><div class="lbl">GPS-Koordinaten</div><div class="val">${p.gps ? p.gps.lat+', '+p.gps.lng+' (±'+p.gps.acc+'m)' : '–'}</div></div>
+</div>
+${p.gps ? `<p style="margin-top:6px;font-size:11px"><a href="https://maps.google.com/?q=${p.gps.lat},${p.gps.lng}" target="_blank">📍 In Google Maps öffnen</a></p>` : ''}
+<h2>Schachtdaten</h2>
+<div class="grid">
+  <div class="f"><div class="lbl">Schacht-Nr.</div><div class="val">${p.schachtNummer||'–'}</div></div>
+  <div class="f"><div class="lbl">Typ</div><div class="val">${p.schachtTyp||'–'}</div></div>
+  <div class="f"><div class="lbl">Tiefe</div><div class="val">${p.tiefe ? p.tiefe+' m' : '–'}</div></div>
+  <div class="f"><div class="lbl">Ø Durchmesser</div><div class="val">${p.durchmesser ? p.durchmesser+' mm' : '–'}</div></div>
+  <div class="f"><div class="lbl">Material</div><div class="val">${p.material||'–'}</div></div>
+  <div class="f"><div class="lbl">Deckeltyp</div><div class="val">${p.deckelTyp||'–'}</div></div>
+</div>
+<h2>Zustand & Schäden</h2>
+<div class="f" style="margin-bottom:8px"><div class="lbl">Gesamtzustand</div><div class="val">${p.zustand||'–'}</div></div>
+${p.schaeden?.length ? `<div>${p.schaeden.map(s=>`<span class="chip">${s}</span>`).join('')}</div>` : ''}
+${p.bemerkungen ? `<div class="f" style="margin-top:8px"><div class="lbl">Bemerkungen</div><div class="val">${p.bemerkungen}</div></div>` : ''}
+${p.skizze ? `<h2>Skizze</h2><div class="skizze"><img src="${p.skizze}"></div>` : ''}
+${p.fotos?.length ? `<h2>Fotos (${p.fotos.length})</h2><div class="foto-row">${p.fotos.map(f=>`<img src="${f.data}">`).join('')}</div>` : ''}
+<div class="foot">KanalProtokoll App · ${new Date().toLocaleString('de-AT')}</div>
+</div></body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `Protokoll_${p.id}_${p.datum}.html`;
+  a.click(); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
